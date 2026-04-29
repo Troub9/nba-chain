@@ -109,10 +109,10 @@
   .feedback.ko { color: var(--danger); }
   .feedback.info { color: var(--muted); }
 
-  .chain-block { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .chain-block { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; overflow-x: auto; }
   .chain-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
   .chain-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .chain-pill { background: var(--dark3); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.82rem; font-weight: 500; animation: pill-in 0.3s ease; }
+  .chain-pill { background: var(--dark3); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.82rem; font-weight: 500; animation: pill-in 0.3s ease; white-space: nowrap; }
   .chain-pill.mine { border-color: rgba(244,99,30,0.35); }
   @keyframes pill-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
   .chain-arrow { color: var(--muted); font-size: 0.9rem; }
@@ -121,7 +121,7 @@
   .end-title { font-family: var(--font-display); font-size: 4rem; letter-spacing: 0.04em; }
   .end-title.win { color: var(--success); }
   .end-title.lose { color: var(--danger); }
-  .end-chain { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .end-chain { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; overflow-x: auto; }
   .end-chain-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
 </style>
 </head>
@@ -135,10 +135,9 @@
   </div>
 </header>
 
-<!-- LOBBY -->
 <div id="lobby" class="screen active">
   <div class="lobby-title">NBA<br/><span>CHAIN</span></div>
-  <p class="lobby-sub">Enchaîne les joueurs NBA. Chaque réponse doit être un joueur qui a évolué avec le précédent. 15 secondes par tour.</p>
+  <p class="lobby-sub">Enchaine les joueurs NBA. Chaque reponse doit etre un joueur qui a evolue avec le precedent. 15 secondes par tour.</p>
   <div class="name-block">
     <div class="name-label">Ton pseudo</div>
     <input class="name-input" id="pseudo-input" type="text" maxlength="20" placeholder="Ex : KobeIsGOAT" autocomplete="off"/>
@@ -153,7 +152,6 @@
   </div>
 </div>
 
-<!-- MATCHMAKING -->
 <div id="matchmaking" class="screen">
   <div class="mm-title">Recherche...</div>
   <p class="mm-pseudo">Connecte en tant que <span id="mm-pseudo-display"></span></p>
@@ -162,7 +160,6 @@
   <button class="btn-cancel" onclick="cancelMatchmaking()">Annuler</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
   <div class="scoreboard">
     <div class="player-info">
@@ -198,7 +195,6 @@
   </div>
 </div>
 
-<!-- END SCREEN -->
 <div id="endscreen" class="screen">
   <div class="end-title" id="end-title">--</div>
   <p style="color:var(--muted); font-size: 0.95rem;" id="end-reason"></p>
@@ -210,25 +206,25 @@
 </div>
 
 <script>
-var API_HTTP = 'http://127.0.0.1:8000';
-var API_WS   = 'ws://127.0.0.1:8000';
+// ── URLs dynamiques : fonctionne en local ET sur Railway ──
+var isSecure  = (window.location.protocol === 'https:');
+var API_HTTP  = window.location.origin;
+var API_WS    = (isSecure ? 'wss://' : 'ws://') + window.location.host;
 
-var ws = null;
-var myName = '';
-var oppName = '';
+var ws            = null;
+var myName        = '';
+var oppName       = '';
 var currentPlayer = null;
-var chain = [];
-var myTurn = false;
+var chain         = [];
+var myTurn        = false;
 var timerInterval = null;
-var timeLeft = 15;
+var timeLeft      = 15;
 
-// ---- UI helpers ----
+// ── UI helpers ────────────────────────────────────────────
 
 function show(id) {
   var screens = document.querySelectorAll('.screen');
-  for (var i = 0; i < screens.length; i++) {
-    screens[i].classList.remove('active');
-  }
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
 }
 
@@ -257,10 +253,10 @@ function renderChain() {
   list.innerHTML = '';
   for (var i = 0; i < chain.length; i++) {
     if (i > 0) {
-      var a = document.createElement('span');
-      a.className = 'chain-arrow';
-      a.textContent = '>';
-      list.appendChild(a);
+      var arr = document.createElement('span');
+      arr.className = 'chain-arrow';
+      arr.textContent = '→';
+      list.appendChild(arr);
     }
     var pill = document.createElement('div');
     pill.className = 'chain-pill' + (chain[i].mine ? ' mine' : '');
@@ -269,16 +265,7 @@ function renderChain() {
   }
 }
 
-function updateTimerUI() {
-  var n = document.getElementById('timer-num');
-  var f = document.getElementById('timer-fill');
-  var pct = (timeLeft / 15) * 100;
-  n.textContent = timeLeft;
-  f.style.width = pct + '%';
-  var danger = timeLeft <= 5;
-  n.className = 'timer-num' + (danger ? ' danger' : '');
-  f.className = 'timer-fill' + (danger ? ' danger' : '');
-}
+// ── Timer visuel ──────────────────────────────────────────
 
 function startVisualTimer() {
   clearInterval(timerInterval);
@@ -294,19 +281,28 @@ function stopVisualTimer() {
   clearInterval(timerInterval);
 }
 
-// ---- Lobby ----
+function updateTimerUI() {
+  var n = document.getElementById('timer-num');
+  var f = document.getElementById('timer-fill');
+  n.textContent = timeLeft;
+  f.style.width = ((timeLeft / 15) * 100) + '%';
+  var danger = timeLeft <= 5;
+  n.className = 'timer-num' + (danger ? ' danger' : '');
+  f.className = 'timer-fill' + (danger ? ' danger' : '');
+}
+
+// ── Lobby ─────────────────────────────────────────────────
 
 var pseudoInput = document.getElementById('pseudo-input');
 var playBtn = document.getElementById('play-btn');
 playBtn.disabled = true;
-
 pseudoInput.addEventListener('input', function() {
   playBtn.disabled = pseudoInput.value.trim().length < 2;
 });
 
 function startMatchmaking() {
   myName = pseudoInput.value.trim();
-  if (myName.length < 2) { return; }
+  if (myName.length < 2) return;
   document.getElementById('mm-pseudo-display').textContent = myName;
   show('matchmaking');
   connectWS();
@@ -320,43 +316,30 @@ function cancelMatchmaking() {
 
 function goLobby() {
   if (ws) { ws.close(); ws = null; }
+  stopVisualTimer();
   show('lobby');
   setStatus(false, 'Hors ligne');
 }
 
-// ---- WebSocket ----
+// ── WebSocket ─────────────────────────────────────────────
 
 function connectWS() {
   setStatus(false, 'Connexion...');
   ws = new WebSocket(API_WS + '/ws/' + encodeURIComponent(myName));
-
-  ws.onopen = function() {
-    setStatus(true, 'Connecte');
-  };
-
-  ws.onclose = function() {
-    setStatus(false, 'Hors ligne');
-    stopVisualTimer();
-  };
-
-  ws.onerror = function() {
-    setStatus(false, 'Erreur');
-    setFeedback('ko', 'Impossible de joindre le serveur. Lance uvicorn !');
-  };
-
-  ws.onmessage = function(event) {
-    var msg = JSON.parse(event.data);
-    handleServerMessage(msg);
-  };
+  ws.onopen  = function() { setStatus(true, 'Connecte'); };
+  ws.onclose = function() { setStatus(false, 'Hors ligne'); stopVisualTimer(); };
+  ws.onerror = function() { setStatus(false, 'Erreur'); setFeedback('ko', 'Impossible de joindre le serveur.'); };
+  ws.onmessage = function(event) { handleServerMessage(JSON.parse(event.data)); };
 }
 
 function handleServerMessage(msg) {
+
   if (msg.event === 'waiting') {
     // deja sur l'ecran matchmaking
 
   } else if (msg.event === 'game_start') {
-    oppName = msg.opponent;
-    myTurn  = msg.your_turn;
+    oppName       = msg.opponent;
+    myTurn        = msg.your_turn;
     currentPlayer = msg.first_player;
     chain = [{ id: currentPlayer.id, name: currentPlayer.name, mine: false }];
 
@@ -373,13 +356,18 @@ function handleServerMessage(msg) {
     startVisualTimer();
 
   } else if (msg.event === 'opponent_played') {
-    stopVisualTimer();
     currentPlayer = msg.player;
-    chain.push({ id: msg.player.id, name: msg.player.name, mine: false });
+    chain.push({ id: msg.player.id, name: msg.player.name, mine: (msg.played_by === myName) });
     document.getElementById('current-name').textContent = msg.player.name;
     document.getElementById('current-via').textContent  = msg.link.team + ' - ' + msg.link.season;
     renderChain();
-    setFeedback('info', msg.played_by + ' a joue ' + msg.player.name);
+
+    if (msg.played_by === myName) {
+      setFeedback('ok', 'Bonne reponse ! A l\'adversaire...');
+    } else {
+      setFeedback('info', msg.played_by + ' a joue ' + msg.player.name);
+    }
+    startVisualTimer();
 
   } else if (msg.event === 'your_turn') {
     currentPlayer = msg.current_player;
@@ -400,34 +388,27 @@ function handleServerMessage(msg) {
   }
 }
 
-// ---- Autocomplete ----
+// ── Autocomplete ──────────────────────────────────────────
 
-document.getElementById('game-input').addEventListener('input', function() {
-  onInput(this.value);
-});
-
+document.getElementById('game-input').addEventListener('input', function() { onInput(this.value); });
 document.getElementById('game-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.getElementById('suggestions').className = 'suggestions';
-  }
+  if (e.key === 'Escape') document.getElementById('suggestions').className = 'suggestions';
 });
 
 function onInput(val) {
   var box = document.getElementById('suggestions');
   if (val.length < 2) { box.className = 'suggestions'; return; }
   fetch(API_HTTP + '/search?q=' + encodeURIComponent(val))
-    .then(function(res) { return res.json(); })
+    .then(function(r) { return r.json(); })
     .then(function(data) {
-      var players = data.players.filter(function(p) {
-        return !currentPlayer || p.id !== currentPlayer.id;
-      });
+      var players = data.players.filter(function(p) { return !currentPlayer || p.id !== currentPlayer.id; });
       if (!players.length) { box.className = 'suggestions'; return; }
       var html = '';
       var shown = players.slice(0, 6);
       for (var i = 0; i < shown.length; i++) {
         var p = shown[i];
         var safeName = p.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        html += '<div class="sug-item" onclick="submitPlayer(' + p.id + ', \'' + safeName + '\')">' + p.name + '</div>';
+        html += '<div class="sug-item" onclick="submitPlayer(' + p.id + ',\'' + safeName + '\')">' + p.name + '</div>';
       }
       box.innerHTML = html;
       box.className = 'suggestions open';
@@ -439,19 +420,15 @@ function submitPlayer(id, name) {
   document.getElementById('suggestions').className = 'suggestions';
   document.getElementById('game-input').value = '';
   document.getElementById('game-input').disabled = true;
-
   if (!ws || ws.readyState !== 1) {
     setFeedback('ko', 'Connexion perdue. Recharge la page.');
     return;
   }
-
-  setFeedback('info', 'Verification de ' + name + '...');
-  chain.push({ id: id, name: name, mine: true });
-  renderChain();
+  setFeedback('info', 'Verification...');
   ws.send(JSON.stringify({ action: 'play', player_id: id }));
 }
 
-// ---- End screen ----
+// ── End screen ────────────────────────────────────────────
 
 var REASON_LABELS = {
   'timeout':               'Tu n\'as pas trouve a temps.',
@@ -464,10 +441,10 @@ function showEndScreen(won, reason) {
   endList.innerHTML = '';
   for (var i = 0; i < chain.length; i++) {
     if (i > 0) {
-      var a = document.createElement('span');
-      a.className = 'chain-arrow';
-      a.textContent = '>';
-      endList.appendChild(a);
+      var arr = document.createElement('span');
+      arr.className = 'chain-arrow';
+      arr.textContent = '→';
+      endList.appendChild(arr);
     }
     var pill = document.createElement('div');
     pill.className = 'chain-pill' + (chain[i].mine ? ' mine' : '');
