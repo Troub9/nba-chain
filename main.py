@@ -18,12 +18,14 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nba-chain")
 
+import os
+
 DB_CONFIG = {
-    "host": "localhost",
+    "host": os.getenv("DB_HOST", "localhost"),
     "port": 5432,
-    "dbname": "nba_chain",
-    "user": "postgres",
-    "password": "Helia16",
+    "dbname": os.getenv("DB_NAME", "nba_chain"),
+    "user": os.getenv("DB_USER", "postgres"),
+    "password": os.getenv("DB_PASSWORD", ""),
 }
 
 TURN_DURATION = 15  # secondes par tour
