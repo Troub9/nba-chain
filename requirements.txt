@@ -4,3 +4,5 @@ psycopg2-binary
 python-dotenv
 websockets
 pydantic
+passlib[bcrypt]
+python-jose[cryptography]

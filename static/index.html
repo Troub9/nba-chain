@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NBA Chain</title>
+<title>Scoriax</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,21 +18,31 @@
     --muted: rgba(240,237,232,0.45);
     --success: #2ECC71;
     --danger: #E74C3C;
+    --gold: #F1C40F;
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
   }
   body { background: var(--dark); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 
+  /* ── HEADER ── */
   header { width: 100%; padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
   .logo { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; }
   .logo span { color: var(--orange); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
   .header-status { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
   .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
   .status-dot.online { background: var(--success); }
+  .user-pill { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 6px; font-size: 0.82rem; }
+  .user-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 500; color: #fff; }
+  .user-elo-hdr { font-family: var(--font-display); color: var(--orange); font-size: 0.95rem; letter-spacing: 0.04em; }
+  .btn-sm { font-size: 0.75rem; padding: 5px 12px; border-radius: 6px; border: 0.5px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .btn-sm:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
 
+  /* ── SCREENS ── */
   .screen { display: none; width: 100%; max-width: 640px; padding: 2rem 1rem; }
   .screen.active { display: flex; flex-direction: column; align-items: center; }
 
+  /* ── LOBBY ── */
   #lobby { gap: 1.75rem; text-align: center; }
   .lobby-title { font-family: var(--font-display); font-size: clamp(3rem, 10vw, 5.5rem); line-height: 0.95; letter-spacing: 0.02em; }
   .lobby-title span { color: var(--orange); }
@@ -55,6 +65,36 @@
   .rule-num { font-family: var(--font-display); font-size: 1.2rem; color: var(--orange); min-width: 20px; }
   .rule-text { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
 
+  /* ── LEADERBOARD ── */
+  .lb-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .lb-card h3 { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--orange); }
+  .lb-row { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center; padding: 0.5rem 0.25rem; border-bottom: 0.5px solid var(--border); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-family: var(--font-display); font-size: 1rem; color: var(--muted); text-align: center; }
+  .lb-rank.gold { color: var(--gold); }
+  .lb-rank.silver { color: #BDC3C7; }
+  .lb-rank.bronze { color: #CD853F; }
+  .lb-name { font-size: 0.88rem; font-weight: 500; }
+  .lb-record { font-size: 0.72rem; color: var(--muted); }
+  .lb-elo { font-family: var(--font-display); font-size: 1.05rem; color: var(--orange); }
+
+  /* ── AUTH ── */
+  #auth { gap: 1.5rem; }
+  .auth-title { font-family: var(--font-display); font-size: 3rem; letter-spacing: 0.04em; text-align: center; }
+  .auth-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.5rem; width: 100%; display: flex; flex-direction: column; gap: 1rem; }
+  .auth-tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 0.5rem; }
+  .auth-tab { flex: 1; text-align: center; padding: 0.6rem; font-size: 0.85rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .auth-tab.active { color: var(--text); border-color: var(--orange); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .field input { background: var(--dark3); border: 0.5px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; font-family: var(--font-body); font-size: 0.95rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--orange); }
+  .field input::placeholder { color: var(--muted); }
+  .auth-err { font-size: 0.82rem; color: var(--danger); text-align: center; min-height: 18px; }
+  .btn-outline { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.08em; background: transparent; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; padding: 0.7rem 2rem; width: 100%; cursor: pointer; transition: all 0.15s; }
+  .btn-outline:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* ── MATCHMAKING ── */
   #matchmaking { gap: 1.5rem; text-align: center; }
   .mm-title { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 0.05em; }
   .mm-pseudo { font-size: 0.9rem; color: var(--muted); }
@@ -67,11 +107,13 @@
   .btn-cancel { font-size: 0.85rem; color: var(--muted); background: none; border: 0.5px solid var(--border); border-radius: 6px; padding: 0.5rem 1.5rem; cursor: pointer; transition: color 0.2s; }
   .btn-cancel:hover { color: var(--text); }
 
+  /* ── GAME ── */
   #game { gap: 1rem; }
   .scoreboard { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
   .player-info { display: flex; flex-direction: column; gap: 2px; }
   .player-info.right { text-align: right; }
   .player-name { font-size: 0.95rem; font-weight: 500; }
+  .player-elo-sb { font-size: 0.72rem; color: var(--muted); }
   .player-badge { display: inline-block; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-top: 2px; }
   .player-badge.you { background: var(--orange-dim); color: var(--orange); }
   .player-badge.opp { background: rgba(255,255,255,0.05); color: var(--muted); }
@@ -117,41 +159,87 @@
   @keyframes pill-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
   .chain-arrow { color: var(--muted); font-size: 0.9rem; }
 
+  /* ── END SCREEN ── */
   #endscreen { gap: 1.5rem; text-align: center; }
   .end-title { font-family: var(--font-display); font-size: 4rem; letter-spacing: 0.04em; }
   .end-title.win { color: var(--success); }
   .end-title.lose { color: var(--danger); }
+  .end-elo { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.06em; }
+  .end-elo.up { color: var(--success); }
+  .end-elo.down { color: var(--danger); }
   .end-chain { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; overflow-x: auto; }
   .end-chain-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+
+  /* ── HINTS ── */
+  .hints-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .hints-card h3 { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.06em; margin-bottom: 0.9rem; color: var(--orange); }
+  .hint-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.75rem; background: var(--dark3); border-radius: 8px; margin-bottom: 6px; font-size: 0.87rem; }
+  .hint-item:last-child { margin-bottom: 0; }
+  .hint-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+  .hint-via { color: var(--muted); font-size: 0.78rem; margin-left: auto; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">NBA <span>Chain</span></div>
-  <div class="header-status">
-    <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">Hors ligne</span>
+  <div class="logo">SCO<span>R</span>IAX</div>
+  <div class="header-right">
+    <div id="header-user" style="display:none" class="user-pill">
+      <div class="user-avatar" id="hdr-avatar">?</div>
+      <span id="hdr-username">—</span>
+      <span class="user-elo-hdr" id="hdr-elo">—</span>
+    </div>
+    <div class="header-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Hors ligne</span>
+    </div>
+    <button class="btn-sm" id="hdr-auth-btn" onclick="show('auth')">Connexion</button>
+    <button class="btn-sm" id="hdr-logout-btn" style="display:none" onclick="logout()">Deconnexion</button>
   </div>
 </header>
 
+<!-- ══ LOBBY ══ -->
 <div id="lobby" class="screen active">
-  <div class="lobby-title">NBA<br/><span>CHAIN</span></div>
+  <div class="lobby-title">SCO<br/><span>RIAX</span></div>
   <p class="lobby-sub">Enchaine les joueurs NBA. Chaque reponse doit etre un joueur qui a evolue avec le precedent. 15 secondes par tour.</p>
+
   <div class="name-block">
     <div class="name-label">Ton pseudo</div>
     <input class="name-input" id="pseudo-input" type="text" maxlength="20" placeholder="Ex : KobeIsGOAT" autocomplete="off"/>
   </div>
   <button class="btn-primary" id="play-btn" onclick="startMatchmaking()">TROUVER UN ADVERSAIRE</button>
+
+  <div class="lb-card">
+    <h3>🏆 TOP 10 ELO</h3>
+    <div id="lb-list"><div style="color:var(--muted);font-size:.85rem">Chargement...</div></div>
+  </div>
+
   <div class="rules-card">
     <h3>Regles</h3>
-    <div class="rule"><div class="rule-num">1</div><div class="rule-text">Un joueur de depart est affiche.</div></div>
+    <div class="rule"><div class="rule-num">1</div><div class="rule-text">Un joueur NBA est tire au sort pour commencer.</div></div>
     <div class="rule"><div class="rule-num">2</div><div class="rule-text">Tu dois nommer un joueur NBA qui a evolue dans la meme equipe, la meme saison.</div></div>
-    <div class="rule"><div class="rule-num">3</div><div class="rule-text">Si tu reponds dans les 15 secondes, la main passe a l'adversaire.</div></div>
-    <div class="rule"><div class="rule-num">4</div><div class="rule-text">Celui qui ne trouve pas perd la manche.</div></div>
+    <div class="rule"><div class="rule-num">3</div><div class="rule-text">15 secondes par tour. Changer d'onglet ou de fenetre = defaite immediate.</div></div>
+    <div class="rule"><div class="rule-num">4</div><div class="rule-text">Celui qui ne trouve pas perd et son adversaire gagne des points ELO.</div></div>
   </div>
 </div>
 
+<!-- ══ AUTH ══ -->
+<div id="auth" class="screen">
+  <div class="auth-title">MON COMPTE</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">CONNEXION</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">INSCRIPTION</div>
+    </div>
+    <div class="field"><label>Pseudo</label><input type="text" id="auth-username" placeholder="ton_pseudo"/></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="auth-password" placeholder="••••••"/></div>
+    <div class="auth-err" id="auth-err"></div>
+    <button class="btn-primary" id="auth-submit-btn" onclick="submitAuth()">CONNEXION</button>
+    <button class="btn-outline" onclick="show('lobby')">RETOUR</button>
+  </div>
+</div>
+
+<!-- ══ MATCHMAKING ══ -->
 <div id="matchmaking" class="screen">
   <div class="mm-title">Recherche...</div>
   <p class="mm-pseudo">Connecte en tant que <span id="mm-pseudo-display"></span></p>
@@ -160,15 +248,18 @@
   <button class="btn-cancel" onclick="cancelMatchmaking()">Annuler</button>
 </div>
 
+<!-- ══ GAME ══ -->
 <div id="game" class="screen">
   <div class="scoreboard">
     <div class="player-info">
       <div class="player-name" id="my-name">Toi</div>
+      <div class="player-elo-sb" id="my-elo-sb"></div>
       <div class="player-badge you">MOI</div>
     </div>
-    <div class="score-center" id="score">0 - 0</div>
+    <div class="score-center" id="score">VS</div>
     <div class="player-info right">
       <div class="player-name" id="opp-name">Adversaire</div>
+      <div class="player-elo-sb" id="opp-elo-sb"></div>
       <div class="player-badge opp">ADV</div>
     </div>
   </div>
@@ -195,22 +286,30 @@
   </div>
 </div>
 
+<!-- ══ END SCREEN ══ -->
 <div id="endscreen" class="screen">
   <div class="end-title" id="end-title">--</div>
+  <div class="end-elo" id="end-elo"></div>
   <p style="color:var(--muted); font-size: 0.95rem;" id="end-reason"></p>
+  <div class="hints-card" id="hints-card" style="display:none">
+    <h3>💡 Reponses qui auraient fonctionne</h3>
+    <div id="hints-list"></div>
+  </div>
   <div class="end-chain">
     <div class="end-chain-label">Chaine finale</div>
     <div class="chain-list" id="end-chain-list"></div>
   </div>
-  <button class="btn-primary" onclick="goLobby()">REJOUER</button>
+  <button class="btn-primary" onclick="startMatchmaking()">REJOUER</button>
+  <button class="btn-outline" style="margin-top:0.5rem" onclick="goLobby()">ACCUEIL</button>
 </div>
 
 <script>
-// ── URLs dynamiques : fonctionne en local ET sur Railway ──
-var isSecure  = (window.location.protocol === 'https:');
-var API_HTTP  = window.location.origin;
-var API_WS    = (isSecure ? 'wss://' : 'ws://') + window.location.host;
+// ── URLs dynamiques ───────────────────────────────────────
+var isSecure = (window.location.protocol === 'https:');
+var API_HTTP = window.location.origin;
+var API_WS   = (isSecure ? 'wss://' : 'ws://') + window.location.host;
 
+// ── State ─────────────────────────────────────────────────
 var ws            = null;
 var myName        = '';
 var oppName       = '';
@@ -219,9 +318,93 @@ var chain         = [];
 var myTurn        = false;
 var timerInterval = null;
 var timeLeft      = 15;
+var token         = null;
+var myElo         = null;
+var usedIds       = [];
 
-// ── UI helpers ────────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────
+var authMode = 'login';
 
+function switchTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').className    = 'auth-tab' + (mode === 'login' ? ' active' : '');
+  document.getElementById('tab-register').className = 'auth-tab' + (mode === 'register' ? ' active' : '');
+  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'CONNEXION' : 'INSCRIPTION';
+  document.getElementById('auth-err').textContent = '';
+}
+
+function submitAuth() {
+  var username = document.getElementById('auth-username').value.trim();
+  var password = document.getElementById('auth-password').value;
+  var err = document.getElementById('auth-err');
+  err.textContent = '';
+  if (!username || !password) { err.textContent = 'Remplis tous les champs'; return; }
+  var endpoint = authMode === 'login' ? '/login' : '/register';
+  fetch(API_HTTP + endpoint, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: username, password: password})
+  })
+  .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+  .then(function(res) {
+    if (!res.ok) { err.textContent = res.data.detail || 'Erreur'; return; }
+    setUser(res.data.token, res.data.username, res.data.elo);
+    // Pre-remplir le pseudo dans le lobby
+    document.getElementById('pseudo-input').value = res.data.username;
+    document.getElementById('play-btn').disabled = false;
+    show('lobby');
+    loadLeaderboard();
+  })
+  .catch(function() { err.textContent = 'Erreur de connexion'; });
+}
+
+function setUser(tok, username, elo) {
+  token = tok; myElo = elo;
+  document.getElementById('header-user').style.display = 'flex';
+  document.getElementById('hdr-avatar').textContent    = username[0].toUpperCase();
+  document.getElementById('hdr-username').textContent  = username;
+  document.getElementById('hdr-elo').textContent       = elo;
+  document.getElementById('hdr-auth-btn').style.display    = 'none';
+  document.getElementById('hdr-logout-btn').style.display  = 'block';
+}
+
+function logout() {
+  token = null; myElo = null;
+  document.getElementById('header-user').style.display    = 'none';
+  document.getElementById('hdr-auth-btn').style.display   = 'block';
+  document.getElementById('hdr-logout-btn').style.display = 'none';
+  document.getElementById('pseudo-input').value = '';
+  document.getElementById('play-btn').disabled = true;
+  show('lobby');
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+function loadLeaderboard() {
+  fetch(API_HTTP + '/leaderboard')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var list = document.getElementById('lb-list');
+    if (!data.leaderboard || !data.leaderboard.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.85rem">Aucun joueur inscrit pour le moment</div>';
+      return;
+    }
+    var html = '';
+    data.leaderboard.forEach(function(u, i) {
+      var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      html += '<div class="lb-row">'
+        + '<div class="lb-rank ' + rankClass + '">' + medal + '</div>'
+        + '<div class="lb-name">' + u.username + '</div>'
+        + '<div class="lb-record">' + u.wins + 'V ' + u.losses + 'D</div>'
+        + '<div class="lb-elo">' + u.elo + '</div>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  })
+  .catch(function() {});
+}
+
+// ── UI HELPERS ────────────────────────────────────────────
 function show(id) {
   var screens = document.querySelectorAll('.screen');
   for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
@@ -265,8 +448,7 @@ function renderChain() {
   }
 }
 
-// ── Timer visuel ──────────────────────────────────────────
-
+// ── TIMER VISUEL ──────────────────────────────────────────
 function startVisualTimer() {
   clearInterval(timerInterval);
   timeLeft = 15;
@@ -277,9 +459,7 @@ function startVisualTimer() {
   }, 1000);
 }
 
-function stopVisualTimer() {
-  clearInterval(timerInterval);
-}
+function stopVisualTimer() { clearInterval(timerInterval); }
 
 function updateTimerUI() {
   var n = document.getElementById('timer-num');
@@ -291,8 +471,7 @@ function updateTimerUI() {
   f.className = 'timer-fill' + (danger ? ' danger' : '');
 }
 
-// ── Lobby ─────────────────────────────────────────────────
-
+// ── LOBBY ─────────────────────────────────────────────────
 var pseudoInput = document.getElementById('pseudo-input');
 var playBtn = document.getElementById('play-btn');
 playBtn.disabled = true;
@@ -317,17 +496,40 @@ function cancelMatchmaking() {
 function goLobby() {
   if (ws) { ws.close(); ws = null; }
   stopVisualTimer();
+  removeAntiCheat();
   show('lobby');
   setStatus(false, 'Hors ligne');
+  loadLeaderboard();
 }
 
-// ── WebSocket ─────────────────────────────────────────────
+// ── ANTI-TRICHE ───────────────────────────────────────────
+function onVisibilityChange() {
+  if (document.hidden) { sendForfeit(); }
+}
+function onWindowBlur() { sendForfeit(); }
 
+function sendForfeit() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({action: 'forfeit'}));
+  }
+}
+
+function addAntiCheat() {
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onWindowBlur);
+}
+
+function removeAntiCheat() {
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+}
+
+// ── WEBSOCKET ─────────────────────────────────────────────
 function connectWS() {
   setStatus(false, 'Connexion...');
   ws = new WebSocket(API_WS + '/ws/' + encodeURIComponent(myName));
   ws.onopen  = function() { setStatus(true, 'Connecte'); };
-  ws.onclose = function() { setStatus(false, 'Hors ligne'); stopVisualTimer(); };
+  ws.onclose = function() { setStatus(false, 'Hors ligne'); stopVisualTimer(); removeAntiCheat(); };
   ws.onerror = function() { setStatus(false, 'Erreur'); setFeedback('ko', 'Impossible de joindre le serveur.'); };
   ws.onmessage = function(event) { handleServerMessage(JSON.parse(event.data)); };
 }
@@ -341,11 +543,13 @@ function handleServerMessage(msg) {
     oppName       = msg.opponent;
     myTurn        = msg.your_turn;
     currentPlayer = msg.first_player;
-    chain = [{ id: currentPlayer.id, name: currentPlayer.name, mine: false }];
+    chain  = [{ id: currentPlayer.id, name: currentPlayer.name, mine: false }];
+    usedIds = [currentPlayer.id];
 
-    document.getElementById('my-name').textContent  = myName;
-    document.getElementById('opp-name').textContent = oppName;
-    document.getElementById('score').textContent    = '0 - 0';
+    document.getElementById('my-name').textContent   = myName;
+    document.getElementById('opp-name').textContent  = oppName;
+    document.getElementById('my-elo-sb').textContent = myElo ? myElo + ' ELO' : '';
+    document.getElementById('score').textContent     = 'VS';
     document.getElementById('current-name').textContent = currentPlayer.name;
     document.getElementById('current-via').textContent  = '';
     document.getElementById('game-input').value = '';
@@ -354,14 +558,15 @@ function handleServerMessage(msg) {
     show('game');
     setTurnUI(myTurn);
     startVisualTimer();
+    addAntiCheat();
 
   } else if (msg.event === 'opponent_played') {
     currentPlayer = msg.player;
     chain.push({ id: msg.player.id, name: msg.player.name, mine: (msg.played_by === myName) });
+    usedIds.push(msg.player.id);
     document.getElementById('current-name').textContent = msg.player.name;
     document.getElementById('current-via').textContent  = msg.link.team + ' - ' + msg.link.season;
     renderChain();
-
     if (msg.played_by === myName) {
       setFeedback('ok', 'Bonne reponse ! A l\'adversaire...');
     } else {
@@ -384,12 +589,12 @@ function handleServerMessage(msg) {
 
   } else if (msg.event === 'game_over') {
     stopVisualTimer();
-    showEndScreen(msg.result === 'win', msg.reason);
+    removeAntiCheat();
+    showEndScreen(msg);
   }
 }
 
-// ── Autocomplete ──────────────────────────────────────────
-
+// ── AUTOCOMPLETE ──────────────────────────────────────────
 document.getElementById('game-input').addEventListener('input', function() { onInput(this.value); });
 document.getElementById('game-input').addEventListener('keydown', function(e) {
   if (e.key === 'Escape') document.getElementById('suggestions').className = 'suggestions';
@@ -401,7 +606,9 @@ function onInput(val) {
   fetch(API_HTTP + '/search?q=' + encodeURIComponent(val))
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var players = data.players.filter(function(p) { return !currentPlayer || p.id !== currentPlayer.id; });
+      var players = data.players.filter(function(p) {
+        return (!currentPlayer || p.id !== currentPlayer.id) && usedIds.indexOf(p.id) === -1;
+      });
       if (!players.length) { box.className = 'suggestions'; return; }
       var html = '';
       var shown = players.slice(0, 6);
@@ -428,35 +635,79 @@ function submitPlayer(id, name) {
   ws.send(JSON.stringify({ action: 'play', player_id: id }));
 }
 
-// ── End screen ────────────────────────────────────────────
-
+// ── END SCREEN ────────────────────────────────────────────
 var REASON_LABELS = {
-  'timeout':               'Tu n\'as pas trouve a temps.',
-  'opponent_timeout':      'L\'adversaire n\'a pas trouve a temps !',
-  'opponent_disconnected': 'L\'adversaire s\'est deconnecte.'
+  'timeout':              'Tu n\'as pas trouve a temps.',
+  'opponent_timeout':     'L\'adversaire n\'a pas trouve a temps !',
+  'opponent_disconnected':'L\'adversaire s\'est deconnecte.',
+  'forfeit':              'Tu as change d\'onglet ou de fenetre.',
+  'opponent_forfeit':     'L\'adversaire a change d\'onglet !'
 };
 
-function showEndScreen(won, reason) {
-  var endList = document.getElementById('end-chain-list');
-  endList.innerHTML = '';
-  for (var i = 0; i < chain.length; i++) {
-    if (i > 0) {
-      var arr = document.createElement('span');
-      arr.className = 'chain-arrow';
-      arr.textContent = '→';
-      endList.appendChild(arr);
-    }
-    var pill = document.createElement('div');
-    pill.className = 'chain-pill' + (chain[i].mine ? ' mine' : '');
-    pill.textContent = chain[i].name;
-    endList.appendChild(pill);
-  }
+function showEndScreen(msg) {
+  var won = msg.result === 'win';
+
+  // Titre
   var title = document.getElementById('end-title');
   title.textContent = won ? 'VICTOIRE' : 'DEFAITE';
   title.className   = 'end-title ' + (won ? 'win' : 'lose');
-  document.getElementById('end-reason').textContent = REASON_LABELS[reason] || reason;
+
+  // Raison
+  document.getElementById('end-reason').textContent = REASON_LABELS[msg.reason] || msg.reason;
+
+  // ELO
+  var eloEl = document.getElementById('end-elo');
+  if (msg.elo_change && msg.new_elo) {
+    eloEl.textContent = msg.elo_change + ' ELO  →  ' + msg.new_elo;
+    eloEl.className   = 'end-elo ' + (won ? 'up' : 'down');
+    myElo = msg.new_elo;
+    document.getElementById('hdr-elo').textContent = msg.new_elo;
+  } else {
+    eloEl.textContent = '';
+  }
+
+  // Chaine finale
+  var endList = document.getElementById('end-chain-list');
+  endList.innerHTML = '';
+  var finalChain = msg.chain || chain;
+  for (var i = 0; i < finalChain.length; i++) {
+    if (i > 0) {
+      var arr = document.createElement('span');
+      arr.className = 'chain-arrow'; arr.textContent = '→';
+      endList.appendChild(arr);
+    }
+    var pill = document.createElement('div');
+    pill.className = 'chain-pill';
+    pill.textContent = finalChain[i].name;
+    endList.appendChild(pill);
+  }
+
+  // Hints (seulement si on a perdu)
+  var hintsCard = document.getElementById('hints-card');
+  hintsCard.style.display = 'none';
+  if (!won && msg.current_player_id) {
+    var excludeStr = (msg.used_ids || usedIds).join(',');
+    fetch(API_HTTP + '/hints/' + msg.current_player_id + '?exclude=' + excludeStr)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.hints && data.hints.length) {
+        var html = '';
+        data.hints.forEach(function(h) {
+          html += '<div class="hint-item"><div class="hint-dot"></div><span>' + h.name + '</span><span class="hint-via">' + h.team + ' · ' + h.season + '</span></div>';
+        });
+        document.getElementById('hints-list').innerHTML = html;
+        hintsCard.style.display = 'block';
+      }
+    })
+    .catch(function() {});
+  }
+
   show('endscreen');
 }
+
+// ── INIT ──────────────────────────────────────────────────
+loadLeaderboard();
+setInterval(loadLeaderboard, 30000);
 </script>
 </body>
 </html>

@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NBA Chain</title>
+<title>Scoriax</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --orange: #F4631E;
     --orange-dim: rgba(244,99,30,0.12);
@@ -19,531 +18,696 @@
     --muted: rgba(240,237,232,0.45);
     --success: #2ECC71;
     --danger: #E74C3C;
+    --gold: #F1C40F;
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
   }
+  body { background: var(--dark); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 
-  body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* --- HEADER --- */
-  header {
-    width: 100%;
-    padding: 1.2rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .logo {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    letter-spacing: 0.04em;
-    color: var(--text);
-  }
+  /* ── HEADER ── */
+  header { width: 100%; padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
+  .logo { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; }
   .logo span { color: var(--orange); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .header-status { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+  .status-dot.online { background: var(--success); }
+  .user-pill { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 6px; font-size: 0.82rem; }
+  .user-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 500; color: #fff; }
+  .user-elo-hdr { font-family: var(--font-display); color: var(--orange); font-size: 0.95rem; letter-spacing: 0.04em; }
+  .btn-sm { font-size: 0.75rem; padding: 5px 12px; border-radius: 6px; border: 0.5px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .btn-sm:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
 
-  /* --- SCREENS --- */
+  /* ── SCREENS ── */
   .screen { display: none; width: 100%; max-width: 640px; padding: 2rem 1rem; }
   .screen.active { display: flex; flex-direction: column; align-items: center; }
 
-  /* --- LOBBY --- */
-  #lobby { gap: 2rem; text-align: center; }
-  .lobby-title {
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 10vw, 5.5rem);
-    line-height: 0.95;
-    letter-spacing: 0.02em;
-  }
+  /* ── LOBBY ── */
+  #lobby { gap: 1.75rem; text-align: center; }
+  .lobby-title { font-family: var(--font-display); font-size: clamp(3rem, 10vw, 5.5rem); line-height: 0.95; letter-spacing: 0.02em; }
   .lobby-title span { color: var(--orange); }
-  .lobby-sub {
-    color: var(--muted);
-    font-size: 1rem;
-    line-height: 1.7;
-    max-width: 420px;
-  }
-  .btn-primary {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    letter-spacing: 0.08em;
-    background: var(--orange);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.9rem 3rem;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-  }
+  .lobby-sub { color: var(--muted); font-size: 1rem; line-height: 1.7; max-width: 420px; }
+
+  .name-block { width: 100%; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+  .name-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .name-input { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 10px; padding: 0.9rem 1.1rem; font-family: var(--font-body); font-size: 1rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .name-input:focus { border-color: var(--orange); }
+  .name-input::placeholder { color: var(--muted); }
+
+  .btn-primary { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.08em; background: var(--orange); color: white; border: none; border-radius: 6px; padding: 0.9rem 3rem; width: 100%; cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
   .btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
   .btn-primary:active { transform: scale(0.97); }
-  .rules-card {
-    background: var(--dark2);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 100%;
-    text-align: left;
-  }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .rules-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.5rem; width: 100%; text-align: left; }
   .rules-card h3 { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--orange); }
   .rule { display: flex; gap: 12px; margin-bottom: 0.75rem; align-items: flex-start; }
   .rule-num { font-family: var(--font-display); font-size: 1.2rem; color: var(--orange); min-width: 20px; }
   .rule-text { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
 
-  /* --- MATCHMAKING --- */
+  /* ── LEADERBOARD ── */
+  .lb-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .lb-card h3 { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--orange); }
+  .lb-row { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center; padding: 0.5rem 0.25rem; border-bottom: 0.5px solid var(--border); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-family: var(--font-display); font-size: 1rem; color: var(--muted); text-align: center; }
+  .lb-rank.gold { color: var(--gold); }
+  .lb-rank.silver { color: #BDC3C7; }
+  .lb-rank.bronze { color: #CD853F; }
+  .lb-name { font-size: 0.88rem; font-weight: 500; }
+  .lb-record { font-size: 0.72rem; color: var(--muted); }
+  .lb-elo { font-family: var(--font-display); font-size: 1.05rem; color: var(--orange); }
+
+  /* ── AUTH ── */
+  #auth { gap: 1.5rem; }
+  .auth-title { font-family: var(--font-display); font-size: 3rem; letter-spacing: 0.04em; text-align: center; }
+  .auth-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.5rem; width: 100%; display: flex; flex-direction: column; gap: 1rem; }
+  .auth-tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 0.5rem; }
+  .auth-tab { flex: 1; text-align: center; padding: 0.6rem; font-size: 0.85rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .auth-tab.active { color: var(--text); border-color: var(--orange); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .field input { background: var(--dark3); border: 0.5px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; font-family: var(--font-body); font-size: 0.95rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--orange); }
+  .field input::placeholder { color: var(--muted); }
+  .auth-err { font-size: 0.82rem; color: var(--danger); text-align: center; min-height: 18px; }
+  .btn-outline { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.08em; background: transparent; color: var(--muted); border: 0.5px solid var(--border); border-radius: 6px; padding: 0.7rem 2rem; width: 100%; cursor: pointer; transition: all 0.15s; }
+  .btn-outline:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* ── MATCHMAKING ── */
   #matchmaking { gap: 1.5rem; text-align: center; }
   .mm-title { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 0.05em; }
+  .mm-pseudo { font-size: 0.9rem; color: var(--muted); }
+  .mm-pseudo span { color: var(--orange); font-weight: 500; }
   .mm-dots { display: flex; gap: 8px; justify-content: center; }
-  .mm-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--orange);
-    animation: dot-bounce 1.2s ease-in-out infinite;
-  }
+  .mm-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); animation: dot-bounce 1.2s ease-in-out infinite; }
   .mm-dot:nth-child(2) { animation-delay: 0.2s; }
   .mm-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dot-bounce { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1.2)} }
+  .btn-cancel { font-size: 0.85rem; color: var(--muted); background: none; border: 0.5px solid var(--border); border-radius: 6px; padding: 0.5rem 1.5rem; cursor: pointer; transition: color 0.2s; }
+  .btn-cancel:hover { color: var(--text); }
 
-  /* --- GAME --- */
+  /* ── GAME ── */
   #game { gap: 1rem; }
-
-  .scoreboard {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 12px;
-    background: var(--dark2);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-  }
+  .scoreboard { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
   .player-info { display: flex; flex-direction: column; gap: 2px; }
   .player-info.right { text-align: right; }
   .player-name { font-size: 0.95rem; font-weight: 500; }
-  .player-elo { font-size: 0.75rem; color: var(--muted); }
+  .player-elo-sb { font-size: 0.72rem; color: var(--muted); }
+  .player-badge { display: inline-block; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-top: 2px; }
+  .player-badge.you { background: var(--orange-dim); color: var(--orange); }
+  .player-badge.opp { background: rgba(255,255,255,0.05); color: var(--muted); }
   .score-center { font-family: var(--font-display); font-size: 2rem; text-align: center; letter-spacing: 0.1em; color: var(--orange); }
 
   .timer-block { width: 100%; }
   .timer-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .turn-label {
-    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 20px;
-    background: var(--orange-dim); color: var(--orange);
-    transition: all 0.3s;
-  }
+  .turn-label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--orange-dim); color: var(--orange); transition: all 0.3s; }
   .turn-label.opponent { background: rgba(255,255,255,0.06); color: var(--muted); }
   .timer-num { font-family: var(--font-display); font-size: 1.4rem; }
   .timer-num.danger { color: var(--danger); }
   .timer-track { width: 100%; height: 4px; background: var(--dark3); border-radius: 2px; overflow: hidden; }
-  .timer-fill {
-    height: 100%; background: var(--orange); border-radius: 2px;
-    transition: width 1s linear, background 0.3s;
-  }
+  .timer-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width 1s linear, background 0.3s; }
   .timer-fill.danger { background: var(--danger); }
 
-  .current-card {
-    width: 100%;
-    background: var(--dark2);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem;
-  }
+  .current-card { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; }
   .current-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
-  .current-name {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    letter-spacing: 0.04em;
-    color: var(--text);
-    transition: all 0.3s;
-  }
+  .current-name { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; color: var(--text); }
   .current-via { font-size: 0.8rem; color: var(--muted); margin-top: 4px; min-height: 18px; }
 
   .input-block { width: 100%; position: relative; }
-  .game-input {
-    width: 100%;
-    background: var(--dark2);
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: 0.9rem 1.1rem;
-    font-family: var(--font-body);
-    font-size: 1rem;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .game-input { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 10px; padding: 0.9rem 1.1rem; font-family: var(--font-body); font-size: 1rem; color: var(--text); outline: none; transition: border-color 0.2s; }
   .game-input:focus { border-color: var(--orange); }
   .game-input:disabled { opacity: 0.4; cursor: not-allowed; }
   .game-input::placeholder { color: var(--muted); }
 
-  .suggestions {
-    display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0; right: 0;
-    background: var(--dark2);
-    border: 0.5px solid rgba(255,255,255,0.14);
-    border-radius: 10px;
-    overflow: hidden;
-    z-index: 10;
-  }
+  .suggestions { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--dark2); border: 0.5px solid rgba(255,255,255,0.14); border-radius: 10px; overflow: hidden; z-index: 10; }
   .suggestions.open { display: block; }
-  .sug-item {
-    padding: 0.75rem 1.1rem;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border-bottom: 0.5px solid var(--border);
-    transition: background 0.1s;
-  }
+  .sug-item { padding: 0.75rem 1.1rem; font-size: 0.95rem; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
   .sug-item:last-child { border-bottom: none; }
   .sug-item:hover { background: var(--dark3); }
 
-  .feedback {
-    font-size: 0.88rem;
-    min-height: 20px;
-    transition: all 0.3s;
-    text-align: center;
-  }
+  .feedback { font-size: 0.88rem; min-height: 20px; transition: all 0.3s; text-align: center; }
   .feedback.ok { color: var(--success); }
   .feedback.ko { color: var(--danger); }
+  .feedback.info { color: var(--muted); }
 
-  .chain-block {
-    width: 100%;
-    background: var(--dark2);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-  }
+  .chain-block { width: 100%; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; overflow-x: auto; }
   .chain-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
   .chain-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .chain-pill {
-    background: var(--dark3);
-    border: 0.5px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    animation: pill-in 0.3s ease;
-  }
+  .chain-pill { background: var(--dark3); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.82rem; font-weight: 500; animation: pill-in 0.3s ease; white-space: nowrap; }
+  .chain-pill.mine { border-color: rgba(244,99,30,0.35); }
   @keyframes pill-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
   .chain-arrow { color: var(--muted); font-size: 0.9rem; }
 
-  /* --- END SCREEN --- */
+  /* ── END SCREEN ── */
   #endscreen { gap: 1.5rem; text-align: center; }
   .end-title { font-family: var(--font-display); font-size: 4rem; letter-spacing: 0.04em; }
   .end-title.win { color: var(--success); }
   .end-title.lose { color: var(--danger); }
-  .end-chain { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .end-elo { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.06em; }
+  .end-elo.up { color: var(--success); }
+  .end-elo.down { color: var(--danger); }
+  .end-chain { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; overflow-x: auto; }
   .end-chain-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+
+  /* ── HINTS ── */
+  .hints-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 100%; text-align: left; }
+  .hints-card h3 { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.06em; margin-bottom: 0.9rem; color: var(--orange); }
+  .hint-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.75rem; background: var(--dark3); border-radius: 8px; margin-bottom: 6px; font-size: 0.87rem; }
+  .hint-item:last-child { margin-bottom: 0; }
+  .hint-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+  .hint-via { color: var(--muted); font-size: 0.78rem; margin-left: auto; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">NBA <span>Chain</span></div>
-  <div style="font-size:0.8rem;color:var(--muted);">Solo vs CPU</div>
+  <div class="logo">SCO<span>R</span>IAX</div>
+  <div class="header-right">
+    <div id="header-user" style="display:none" class="user-pill">
+      <div class="user-avatar" id="hdr-avatar">?</div>
+      <span id="hdr-username">—</span>
+      <span class="user-elo-hdr" id="hdr-elo">—</span>
+    </div>
+    <div class="header-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Hors ligne</span>
+    </div>
+    <button class="btn-sm" id="hdr-auth-btn" onclick="show('auth')">Connexion</button>
+    <button class="btn-sm" id="hdr-logout-btn" style="display:none" onclick="logout()">Deconnexion</button>
+  </div>
 </header>
 
-<!-- LOBBY -->
+<!-- ══ LOBBY ══ -->
 <div id="lobby" class="screen active">
-  <div class="lobby-title">NBA<br/><span>CHAIN</span></div>
-  <p class="lobby-sub">Enchaîne les joueurs NBA. Chaque réponse doit être un joueur qui a évolué avec le précédent. 15 secondes par tour.</p>
-  <button class="btn-primary" onclick="startMatchmaking()">JOUER</button>
+  <div class="lobby-title">SCO<br/><span>RIAX</span></div>
+  <p class="lobby-sub">Enchaine les joueurs NBA. Chaque reponse doit etre un joueur qui a evolue avec le precedent. 15 secondes par tour.</p>
+
+  <div class="name-block">
+    <div class="name-label">Ton pseudo</div>
+    <input class="name-input" id="pseudo-input" type="text" maxlength="20" placeholder="Ex : KobeIsGOAT" autocomplete="off"/>
+  </div>
+  <button class="btn-primary" id="play-btn" onclick="startMatchmaking()">TROUVER UN ADVERSAIRE</button>
+
+  <div class="lb-card">
+    <h3>🏆 TOP 10 ELO</h3>
+    <div id="lb-list"><div style="color:var(--muted);font-size:.85rem">Chargement...</div></div>
+  </div>
+
   <div class="rules-card">
-    <h3>Règles</h3>
-    <div class="rule"><div class="rule-num">1</div><div class="rule-text">Un joueur de départ est affiché.</div></div>
-    <div class="rule"><div class="rule-num">2</div><div class="rule-text">Tu dois nommer un joueur NBA qui a évolué dans la même équipe, la même saison.</div></div>
-    <div class="rule"><div class="rule-num">3</div><div class="rule-text">Si tu réponds dans les 15 secondes, la main passe à l'adversaire.</div></div>
-    <div class="rule"><div class="rule-num">4</div><div class="rule-text">Celui qui ne trouve pas perd la manche.</div></div>
+    <h3>Regles</h3>
+    <div class="rule"><div class="rule-num">1</div><div class="rule-text">Un joueur NBA est tire au sort pour commencer.</div></div>
+    <div class="rule"><div class="rule-num">2</div><div class="rule-text">Tu dois nommer un joueur NBA qui a evolue dans la meme equipe, la meme saison.</div></div>
+    <div class="rule"><div class="rule-num">3</div><div class="rule-text">15 secondes par tour. Changer d'onglet ou de fenetre = defaite immediate.</div></div>
+    <div class="rule"><div class="rule-num">4</div><div class="rule-text">Celui qui ne trouve pas perd et son adversaire gagne des points ELO.</div></div>
   </div>
 </div>
 
-<!-- MATCHMAKING -->
-<div id="matchmaking" class="screen">
-  <div class="mm-title">Recherche...</div>
-  <div class="mm-dots"><div class="mm-dot"></div><div class="mm-dot"></div><div class="mm-dot"></div></div>
-  <p style="color:var(--muted);font-size:0.9rem;">En attente d'un adversaire</p>
+<!-- ══ AUTH ══ -->
+<div id="auth" class="screen">
+  <div class="auth-title">MON COMPTE</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">CONNEXION</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">INSCRIPTION</div>
+    </div>
+    <div class="field"><label>Pseudo</label><input type="text" id="auth-username" placeholder="ton_pseudo"/></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="auth-password" placeholder="••••••"/></div>
+    <div class="auth-err" id="auth-err"></div>
+    <button class="btn-primary" id="auth-submit-btn" onclick="submitAuth()">CONNEXION</button>
+    <button class="btn-outline" onclick="show('lobby')">RETOUR</button>
+  </div>
 </div>
 
-<!-- GAME -->
+<!-- ══ MATCHMAKING ══ -->
+<div id="matchmaking" class="screen">
+  <div class="mm-title">Recherche...</div>
+  <p class="mm-pseudo">Connecte en tant que <span id="mm-pseudo-display"></span></p>
+  <div class="mm-dots"><div class="mm-dot"></div><div class="mm-dot"></div><div class="mm-dot"></div></div>
+  <p style="color:var(--muted);font-size:0.9rem;">En attente d'un adversaire</p>
+  <button class="btn-cancel" onclick="cancelMatchmaking()">Annuler</button>
+</div>
+
+<!-- ══ GAME ══ -->
 <div id="game" class="screen">
   <div class="scoreboard">
     <div class="player-info">
       <div class="player-name" id="my-name">Toi</div>
-      <div class="player-elo">1 420 ELO</div>
+      <div class="player-elo-sb" id="my-elo-sb"></div>
+      <div class="player-badge you">MOI</div>
     </div>
-    <div class="score-center" id="score">0 — 0</div>
+    <div class="score-center" id="score">VS</div>
     <div class="player-info right">
-      <div class="player-name">CPU</div>
-      <div class="player-elo">1 385 ELO</div>
+      <div class="player-name" id="opp-name">Adversaire</div>
+      <div class="player-elo-sb" id="opp-elo-sb"></div>
+      <div class="player-badge opp">ADV</div>
     </div>
   </div>
-
   <div class="timer-block">
     <div class="timer-row">
       <span class="turn-label" id="turn-label">Ton tour</span>
       <span class="timer-num" id="timer-num">15</span>
     </div>
-    <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+    <div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
   </div>
-
   <div class="current-card">
     <div class="current-label">Joueur actuel</div>
-    <div class="current-name" id="current-name">—</div>
+    <div class="current-name" id="current-name">--</div>
     <div class="current-via" id="current-via"></div>
   </div>
-
   <div class="input-block">
-    <input class="game-input" id="game-input" type="text" placeholder="Tape un nom de joueur NBA..." autocomplete="off" oninput="onInput(this.value)" onkeydown="onKey(event)"/>
+    <input class="game-input" id="game-input" type="text" placeholder="Tape un nom de joueur NBA..." autocomplete="off"/>
     <div class="suggestions" id="suggestions"></div>
   </div>
-
   <div class="feedback" id="feedback"></div>
-
   <div class="chain-block">
-    <div class="chain-label">Chaîne</div>
+    <div class="chain-label">Chaine</div>
     <div class="chain-list" id="chain-list"></div>
   </div>
 </div>
 
-<!-- END SCREEN -->
+<!-- ══ END SCREEN ══ -->
 <div id="endscreen" class="screen">
-  <div class="end-title" id="end-title">—</div>
-  <p style="color:var(--muted);" id="end-reason"></p>
+  <div class="end-title" id="end-title">--</div>
+  <div class="end-elo" id="end-elo"></div>
+  <p style="color:var(--muted); font-size: 0.95rem;" id="end-reason"></p>
+  <div class="hints-card" id="hints-card" style="display:none">
+    <h3>💡 Reponses qui auraient fonctionne</h3>
+    <div id="hints-list"></div>
+  </div>
   <div class="end-chain">
-    <div class="end-chain-label">Chaîne finale</div>
+    <div class="end-chain-label">Chaine finale</div>
     <div class="chain-list" id="end-chain-list"></div>
   </div>
-  <button class="btn-primary" onclick="goLobby()">REJOUER</button>
+  <button class="btn-primary" onclick="startMatchmaking()">REJOUER</button>
+  <button class="btn-outline" style="margin-top:0.5rem" onclick="goLobby()">ACCUEIL</button>
 </div>
 
 <script>
-const API = 'http://127.0.0.1:8000';
-let state = {
-  currentPlayer: null,
-  chain: [],
-  myTurn: true,
-  timeLeft: 15,
-  timer: null,
-  myScore: 0,
-  cpuScore: 0,
-};
+// ── URLs dynamiques ───────────────────────────────────────
+var isSecure = (window.location.protocol === 'https:');
+var API_HTTP = window.location.origin;
+var API_WS   = (isSecure ? 'wss://' : 'ws://') + window.location.host;
 
+// ── State ─────────────────────────────────────────────────
+var ws            = null;
+var myName        = '';
+var oppName       = '';
+var currentPlayer = null;
+var chain         = [];
+var myTurn        = false;
+var timerInterval = null;
+var timeLeft      = 15;
+var token         = null;
+var myElo         = null;
+var usedIds       = [];
+
+// ── AUTH ──────────────────────────────────────────────────
+var authMode = 'login';
+
+function switchTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').className    = 'auth-tab' + (mode === 'login' ? ' active' : '');
+  document.getElementById('tab-register').className = 'auth-tab' + (mode === 'register' ? ' active' : '');
+  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'CONNEXION' : 'INSCRIPTION';
+  document.getElementById('auth-err').textContent = '';
+}
+
+function submitAuth() {
+  var username = document.getElementById('auth-username').value.trim();
+  var password = document.getElementById('auth-password').value;
+  var err = document.getElementById('auth-err');
+  err.textContent = '';
+  if (!username || !password) { err.textContent = 'Remplis tous les champs'; return; }
+  var endpoint = authMode === 'login' ? '/login' : '/register';
+  fetch(API_HTTP + endpoint, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: username, password: password})
+  })
+  .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+  .then(function(res) {
+    if (!res.ok) { err.textContent = res.data.detail || 'Erreur'; return; }
+    setUser(res.data.token, res.data.username, res.data.elo);
+    // Pre-remplir le pseudo dans le lobby
+    document.getElementById('pseudo-input').value = res.data.username;
+    document.getElementById('play-btn').disabled = false;
+    show('lobby');
+    loadLeaderboard();
+  })
+  .catch(function() { err.textContent = 'Erreur de connexion'; });
+}
+
+function setUser(tok, username, elo) {
+  token = tok; myElo = elo;
+  document.getElementById('header-user').style.display = 'flex';
+  document.getElementById('hdr-avatar').textContent    = username[0].toUpperCase();
+  document.getElementById('hdr-username').textContent  = username;
+  document.getElementById('hdr-elo').textContent       = elo;
+  document.getElementById('hdr-auth-btn').style.display    = 'none';
+  document.getElementById('hdr-logout-btn').style.display  = 'block';
+}
+
+function logout() {
+  token = null; myElo = null;
+  document.getElementById('header-user').style.display    = 'none';
+  document.getElementById('hdr-auth-btn').style.display   = 'block';
+  document.getElementById('hdr-logout-btn').style.display = 'none';
+  document.getElementById('pseudo-input').value = '';
+  document.getElementById('play-btn').disabled = true;
+  show('lobby');
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+function loadLeaderboard() {
+  fetch(API_HTTP + '/leaderboard')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var list = document.getElementById('lb-list');
+    if (!data.leaderboard || !data.leaderboard.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.85rem">Aucun joueur inscrit pour le moment</div>';
+      return;
+    }
+    var html = '';
+    data.leaderboard.forEach(function(u, i) {
+      var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      html += '<div class="lb-row">'
+        + '<div class="lb-rank ' + rankClass + '">' + medal + '</div>'
+        + '<div class="lb-name">' + u.username + '</div>'
+        + '<div class="lb-record">' + u.wins + 'V ' + u.losses + 'D</div>'
+        + '<div class="lb-elo">' + u.elo + '</div>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  })
+  .catch(function() {});
+}
+
+// ── UI HELPERS ────────────────────────────────────────────
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
 }
 
-function startMatchmaking() {
-  show('matchmaking');
-  setTimeout(startGame, 2000);
+function setStatus(online, text) {
+  document.getElementById('status-dot').className = 'status-dot' + (online ? ' online' : '');
+  document.getElementById('status-text').textContent = text;
 }
-
-async function startGame() {
-  const starters = [
-    {id:2544, name:'LeBron James'},
-    {id:977, name:'Kobe Bryant'},
-    {id:201142, name:'Kevin Durant'},
-    {id:202695, name:'Klay Thompson'},
-    {id:201566, name:'Russell Westbrook'},
-  ];
-  const pick = starters[Math.floor(Math.random() * starters.length)];
-  state.currentPlayer = pick;
-  state.chain = [pick];
-  state.myTurn = true;
-  state.myScore = 0;
-  state.cpuScore = 0;
-
-  renderChain();
-  document.getElementById('current-name').textContent = pick.name;
-  document.getElementById('current-via').textContent = '';
-  document.getElementById('score').textContent = '0 — 0';
-  document.getElementById('game-input').disabled = false;
-  document.getElementById('game-input').value = '';
-  document.getElementById('feedback').textContent = '';
-  show('game');
-  startTimer();
-}
-
-function startTimer() {
-  clearInterval(state.timer);
-  state.timeLeft = 15;
-  updateTimerUI();
-  state.timer = setInterval(() => {
-    state.timeLeft--;
-    updateTimerUI();
-    if (state.timeLeft <= 0) {
-      clearInterval(state.timer);
-      if (state.myTurn) endRound(false, 'Temps écoulé !');
-      else endRound(true, 'L\'adversaire n\'a pas trouvé !');
-    }
-  }, 1000);
-}
-
-function updateTimerUI() {
-  const n = document.getElementById('timer-num');
-  const f = document.getElementById('timer-fill');
-  const pct = (state.timeLeft / 15) * 100;
-  n.textContent = state.timeLeft;
-  f.style.width = pct + '%';
-  const danger = state.timeLeft <= 5;
-  n.className = 'timer-num' + (danger ? ' danger' : '');
-  f.className = 'timer-fill' + (danger ? ' danger' : '');
-}
-
-function setTurnUI(myTurn) {
-  const label = document.getElementById('turn-label');
-  label.textContent = myTurn ? 'Ton tour' : 'Tour CPU';
-  label.className = 'turn-label' + (myTurn ? '' : ' opponent');
-  document.getElementById('game-input').disabled = !myTurn;
-}
-
-async function onInput(val) {
-  const box = document.getElementById('suggestions');
-  if (val.length < 2) { box.className = 'suggestions'; return; }
-  try {
-    const res = await fetch(`${API}/search?q=${encodeURIComponent(val)}`);
-    const data = await res.json();
-    const players = data.players.filter(p => p.id !== state.currentPlayer.id);
-    if (!players.length) { box.className = 'suggestions'; return; }
-    box.innerHTML = players.slice(0,6).map(p =>
-      `<div class="sug-item" onclick="submitPlayer(${p.id},'${p.name.replace(/'/g,"\\'")}')"> ${p.name}</div>`
-    ).join('');
-    box.className = 'suggestions open';
-  } catch(e) {
-    box.className = 'suggestions';
-  }
-}
-
-function onKey(e) {
-  if (e.key === 'Escape') document.getElementById('suggestions').className = 'suggestions';
-}
-
-async function submitPlayer(id, name) {
-  document.getElementById('suggestions').className = 'suggestions';
-  document.getElementById('game-input').value = '';
-  document.getElementById('game-input').disabled = true;
-
-  try {
-    const res = await fetch(`${API}/verify`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({current_player_id: state.currentPlayer.id, proposed_player_id: id})
-    });
-    const data = await res.json();
-
-    if (data.valid) {
-      clearInterval(state.timer);
-      setFeedback('ok', `✓ ${data.team} — ${data.season}`);
-      state.currentPlayer = {id, name};
-      state.chain.push({id, name, via: `${data.team} ${data.season}`});
-      document.getElementById('current-name').textContent = name;
-      document.getElementById('current-via').textContent = `${data.team} · ${data.season}`;
-      renderChain();
-      state.myTurn = false;
-      setTurnUI(false);
-      setTimeout(() => {
-        setFeedback('', '');
-        cpuPlay();
-      }, 1200);
-    } else {
-      setFeedback('ko', '✗ Ces joueurs n\'ont pas joué ensemble');
-      document.getElementById('game-input').disabled = false;
-      setTimeout(() => setFeedback('', ''), 1800);
-    }
-  } catch(e) {
-    setFeedback('ko', 'Erreur de connexion à l\'API');
-    document.getElementById('game-input').disabled = false;
-  }
-}
-
-async function cpuPlay() {
-  startTimer();
-  const thinkTime = 2000 + Math.random() * 3000;
-  await new Promise(r => setTimeout(r, thinkTime));
-  if (!state.myTurn) {
-    try {
-      const res = await fetch(`${API}/search?q=a`);
-      const data = await res.json();
-      const candidates = data.players.filter(p => p.id !== state.currentPlayer.id);
-      for (const candidate of candidates.sort(() => Math.random() - 0.5)) {
-        const vres = await fetch(`${API}/verify`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({current_player_id: state.currentPlayer.id, proposed_player_id: candidate.id})
-        });
-        const vdata = await vres.json();
-        if (vdata.valid) {
-          clearInterval(state.timer);
-          setFeedback('ok', `CPU: ${candidate.name} — ${vdata.team} ${vdata.season}`);
-          state.currentPlayer = candidate;
-          state.chain.push({id: candidate.id, name: candidate.name, via:`${vdata.team} ${vdata.season}`});
-          document.getElementById('current-name').textContent = candidate.name;
-          document.getElementById('current-via').textContent = `${vdata.team} · ${vdata.season}`;
-          renderChain();
-          state.myTurn = true;
-          setTurnUI(true);
-          setTimeout(() => {
-            setFeedback('', '');
-            startTimer();
-          }, 1200);
-          return;
-        }
-      }
-      endRound(true, 'Le CPU n\'a pas trouvé !');
-    } catch(e) {
-      endRound(true, 'Erreur CPU');
-    }
-  }
-}
-
-function endRound(won, reason) {
-  clearInterval(state.timer);
-  if (won) state.myScore++;
-  else state.cpuScore++;
-  document.getElementById('score').textContent = `${state.myScore} — ${state.cpuScore}`;
-
-  const endChain = document.getElementById('end-chain-list');
-  endChain.innerHTML = '';
-  state.chain.forEach((p, i) => {
-    if (i > 0) { const a = document.createElement('span'); a.className='chain-arrow'; a.textContent='→'; endChain.appendChild(a); }
-    const pill = document.createElement('div');
-    pill.className = 'chain-pill';
-    pill.textContent = p.name;
-    endChain.appendChild(pill);
-  });
-
-  const title = document.getElementById('end-title');
-  title.textContent = won ? 'VICTOIRE' : 'DÉFAITE';
-  title.className = 'end-title ' + (won ? 'win' : 'lose');
-  document.getElementById('end-reason').textContent = reason;
-  show('endscreen');
-}
-
-function goLobby() { show('lobby'); }
 
 function setFeedback(type, msg) {
-  const el = document.getElementById('feedback');
+  var el = document.getElementById('feedback');
   el.textContent = msg;
   el.className = 'feedback' + (type ? ' ' + type : '');
 }
 
-function renderChain() {
-  const list = document.getElementById('chain-list');
-  list.innerHTML = '';
-  state.chain.forEach((p, i) => {
-    if (i > 0) { const a = document.createElement('span'); a.className='chain-arrow'; a.textContent='→'; list.appendChild(a); }
-    const pill = document.createElement('div');
-    pill.className = 'chain-pill';
-    pill.textContent = p.name;
-    list.appendChild(pill);
-  });
+function setTurnUI(isMine) {
+  var label = document.getElementById('turn-label');
+  label.textContent = isMine ? 'Ton tour' : ('Tour de ' + oppName);
+  label.className = 'turn-label' + (isMine ? '' : ' opponent');
+  var input = document.getElementById('game-input');
+  input.disabled = !isMine;
+  if (isMine) { input.focus(); }
 }
+
+function renderChain() {
+  var list = document.getElementById('chain-list');
+  list.innerHTML = '';
+  for (var i = 0; i < chain.length; i++) {
+    if (i > 0) {
+      var arr = document.createElement('span');
+      arr.className = 'chain-arrow';
+      arr.textContent = '→';
+      list.appendChild(arr);
+    }
+    var pill = document.createElement('div');
+    pill.className = 'chain-pill' + (chain[i].mine ? ' mine' : '');
+    pill.textContent = chain[i].name;
+    list.appendChild(pill);
+  }
+}
+
+// ── TIMER VISUEL ──────────────────────────────────────────
+function startVisualTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 15;
+  updateTimerUI();
+  timerInterval = setInterval(function() {
+    timeLeft = Math.max(0, timeLeft - 1);
+    updateTimerUI();
+  }, 1000);
+}
+
+function stopVisualTimer() { clearInterval(timerInterval); }
+
+function updateTimerUI() {
+  var n = document.getElementById('timer-num');
+  var f = document.getElementById('timer-fill');
+  n.textContent = timeLeft;
+  f.style.width = ((timeLeft / 15) * 100) + '%';
+  var danger = timeLeft <= 5;
+  n.className = 'timer-num' + (danger ? ' danger' : '');
+  f.className = 'timer-fill' + (danger ? ' danger' : '');
+}
+
+// ── LOBBY ─────────────────────────────────────────────────
+var pseudoInput = document.getElementById('pseudo-input');
+var playBtn = document.getElementById('play-btn');
+playBtn.disabled = true;
+pseudoInput.addEventListener('input', function() {
+  playBtn.disabled = pseudoInput.value.trim().length < 2;
+});
+
+function startMatchmaking() {
+  myName = pseudoInput.value.trim();
+  if (myName.length < 2) return;
+  document.getElementById('mm-pseudo-display').textContent = myName;
+  show('matchmaking');
+  connectWS();
+}
+
+function cancelMatchmaking() {
+  if (ws) { ws.close(); ws = null; }
+  setStatus(false, 'Hors ligne');
+  show('lobby');
+}
+
+function goLobby() {
+  if (ws) { ws.close(); ws = null; }
+  stopVisualTimer();
+  removeAntiCheat();
+  show('lobby');
+  setStatus(false, 'Hors ligne');
+  loadLeaderboard();
+}
+
+// ── ANTI-TRICHE ───────────────────────────────────────────
+function onVisibilityChange() {
+  if (document.hidden) { sendForfeit(); }
+}
+function onWindowBlur() { sendForfeit(); }
+
+function sendForfeit() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({action: 'forfeit'}));
+  }
+}
+
+function addAntiCheat() {
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onWindowBlur);
+}
+
+function removeAntiCheat() {
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+}
+
+// ── WEBSOCKET ─────────────────────────────────────────────
+function connectWS() {
+  setStatus(false, 'Connexion...');
+  ws = new WebSocket(API_WS + '/ws/' + encodeURIComponent(myName));
+  ws.onopen  = function() { setStatus(true, 'Connecte'); };
+  ws.onclose = function() { setStatus(false, 'Hors ligne'); stopVisualTimer(); removeAntiCheat(); };
+  ws.onerror = function() { setStatus(false, 'Erreur'); setFeedback('ko', 'Impossible de joindre le serveur.'); };
+  ws.onmessage = function(event) { handleServerMessage(JSON.parse(event.data)); };
+}
+
+function handleServerMessage(msg) {
+
+  if (msg.event === 'waiting') {
+    // deja sur l'ecran matchmaking
+
+  } else if (msg.event === 'game_start') {
+    oppName       = msg.opponent;
+    myTurn        = msg.your_turn;
+    currentPlayer = msg.first_player;
+    chain  = [{ id: currentPlayer.id, name: currentPlayer.name, mine: false }];
+    usedIds = [currentPlayer.id];
+
+    document.getElementById('my-name').textContent   = myName;
+    document.getElementById('opp-name').textContent  = oppName;
+    document.getElementById('my-elo-sb').textContent = myElo ? myElo + ' ELO' : '';
+    document.getElementById('score').textContent     = 'VS';
+    document.getElementById('current-name').textContent = currentPlayer.name;
+    document.getElementById('current-via').textContent  = '';
+    document.getElementById('game-input').value = '';
+    setFeedback('', '');
+    renderChain();
+    show('game');
+    setTurnUI(myTurn);
+    startVisualTimer();
+    addAntiCheat();
+
+  } else if (msg.event === 'opponent_played') {
+    currentPlayer = msg.player;
+    chain.push({ id: msg.player.id, name: msg.player.name, mine: (msg.played_by === myName) });
+    usedIds.push(msg.player.id);
+    document.getElementById('current-name').textContent = msg.player.name;
+    document.getElementById('current-via').textContent  = msg.link.team + ' - ' + msg.link.season;
+    renderChain();
+    if (msg.played_by === myName) {
+      setFeedback('ok', 'Bonne reponse ! A l\'adversaire...');
+    } else {
+      setFeedback('info', msg.played_by + ' a joue ' + msg.player.name);
+    }
+    startVisualTimer();
+
+  } else if (msg.event === 'your_turn') {
+    currentPlayer = msg.current_player;
+    myTurn = true;
+    setTurnUI(true);
+    startVisualTimer();
+    setTimeout(function() { setFeedback('', ''); }, 1500);
+
+  } else if (msg.event === 'invalid_answer') {
+    setFeedback('ko', msg.reason);
+    document.getElementById('game-input').disabled = false;
+    document.getElementById('game-input').focus();
+    setTimeout(function() { setFeedback('', ''); }, 2500);
+
+  } else if (msg.event === 'game_over') {
+    stopVisualTimer();
+    removeAntiCheat();
+    showEndScreen(msg);
+  }
+}
+
+// ── AUTOCOMPLETE ──────────────────────────────────────────
+document.getElementById('game-input').addEventListener('input', function() { onInput(this.value); });
+document.getElementById('game-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('suggestions').className = 'suggestions';
+});
+
+function onInput(val) {
+  var box = document.getElementById('suggestions');
+  if (val.length < 2) { box.className = 'suggestions'; return; }
+  fetch(API_HTTP + '/search?q=' + encodeURIComponent(val))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var players = data.players.filter(function(p) {
+        return (!currentPlayer || p.id !== currentPlayer.id) && usedIds.indexOf(p.id) === -1;
+      });
+      if (!players.length) { box.className = 'suggestions'; return; }
+      var html = '';
+      var shown = players.slice(0, 6);
+      for (var i = 0; i < shown.length; i++) {
+        var p = shown[i];
+        var safeName = p.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += '<div class="sug-item" onclick="submitPlayer(' + p.id + ',\'' + safeName + '\')">' + p.name + '</div>';
+      }
+      box.innerHTML = html;
+      box.className = 'suggestions open';
+    })
+    .catch(function() { box.className = 'suggestions'; });
+}
+
+function submitPlayer(id, name) {
+  document.getElementById('suggestions').className = 'suggestions';
+  document.getElementById('game-input').value = '';
+  document.getElementById('game-input').disabled = true;
+  if (!ws || ws.readyState !== 1) {
+    setFeedback('ko', 'Connexion perdue. Recharge la page.');
+    return;
+  }
+  setFeedback('info', 'Verification...');
+  ws.send(JSON.stringify({ action: 'play', player_id: id }));
+}
+
+// ── END SCREEN ────────────────────────────────────────────
+var REASON_LABELS = {
+  'timeout':              'Tu n\'as pas trouve a temps.',
+  'opponent_timeout':     'L\'adversaire n\'a pas trouve a temps !',
+  'opponent_disconnected':'L\'adversaire s\'est deconnecte.',
+  'forfeit':              'Tu as change d\'onglet ou de fenetre.',
+  'opponent_forfeit':     'L\'adversaire a change d\'onglet !'
+};
+
+function showEndScreen(msg) {
+  var won = msg.result === 'win';
+
+  // Titre
+  var title = document.getElementById('end-title');
+  title.textContent = won ? 'VICTOIRE' : 'DEFAITE';
+  title.className   = 'end-title ' + (won ? 'win' : 'lose');
+
+  // Raison
+  document.getElementById('end-reason').textContent = REASON_LABELS[msg.reason] || msg.reason;
+
+  // ELO
+  var eloEl = document.getElementById('end-elo');
+  if (msg.elo_change && msg.new_elo) {
+    eloEl.textContent = msg.elo_change + ' ELO  →  ' + msg.new_elo;
+    eloEl.className   = 'end-elo ' + (won ? 'up' : 'down');
+    myElo = msg.new_elo;
+    document.getElementById('hdr-elo').textContent = msg.new_elo;
+  } else {
+    eloEl.textContent = '';
+  }
+
+  // Chaine finale
+  var endList = document.getElementById('end-chain-list');
+  endList.innerHTML = '';
+  var finalChain = msg.chain || chain;
+  for (var i = 0; i < finalChain.length; i++) {
+    if (i > 0) {
+      var arr = document.createElement('span');
+      arr.className = 'chain-arrow'; arr.textContent = '→';
+      endList.appendChild(arr);
+    }
+    var pill = document.createElement('div');
+    pill.className = 'chain-pill';
+    pill.textContent = finalChain[i].name;
+    endList.appendChild(pill);
+  }
+
+  // Hints (seulement si on a perdu)
+  var hintsCard = document.getElementById('hints-card');
+  hintsCard.style.display = 'none';
+  if (!won && msg.current_player_id) {
+    var excludeStr = (msg.used_ids || usedIds).join(',');
+    fetch(API_HTTP + '/hints/' + msg.current_player_id + '?exclude=' + excludeStr)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.hints && data.hints.length) {
+        var html = '';
+        data.hints.forEach(function(h) {
+          html += '<div class="hint-item"><div class="hint-dot"></div><span>' + h.name + '</span><span class="hint-via">' + h.team + ' · ' + h.season + '</span></div>';
+        });
+        document.getElementById('hints-list').innerHTML = html;
+        hintsCard.style.display = 'block';
+      }
+    })
+    .catch(function() {});
+  }
+
+  show('endscreen');
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadLeaderboard();
+setInterval(loadLeaderboard, 30000);
 </script>
 </body>
 </html>
